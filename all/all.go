@@ -34,6 +34,15 @@ func compute(C int, star [][]int) (out []int) {
 			}
 		}
 	}
+	for i, start := range preComp[:len(preComp)-1] {
+		for _, end := range preComp[i+1:] {
+			for _, s := range start {
+				for _, e := range end {
+					out = append(out, s+C+e)
+				}
+			}
+		}
+	}
 	out = append(out, C) // přidá jádro
 	return
 }
@@ -58,5 +67,6 @@ func main() {
 	}
 	frequencies = compute(C, star)
 	sort.Slice(frequencies, func(i, j int) bool { return frequencies[i] < frequencies[j] })
-	fmt.Println(frequencies)
+	out := fmt.Sprint(frequencies)
+	fmt.Println(out[1 : len(out)-1])
 }

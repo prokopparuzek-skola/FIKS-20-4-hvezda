@@ -24,11 +24,14 @@ func find(C int, star [][]int, what int) (int, int) {
 		}
 	}
 	for i, ray := range preComp { // hledá mezi kombinacemi v paprsích
+	p1:
 		for j := range ray {
 			for k := range ray[j:] {
 				if j == 0 { // od začátku
 					if ray[k] == what { // bez jádra
 						return star[i][0], star[i][k]
+					} else if ray[k] > what {
+						continue p1
 					}
 					if ray[k]+C == what { // s jádrem
 						return C, star[i][k]
@@ -36,6 +39,8 @@ func find(C int, star [][]int, what int) (int, int) {
 				} else { // od prostřed
 					if ray[k+1]-ray[j-1] == what {
 						return star[i][k+1], star[i][j]
+					} else if ray[k+1]-ray[j-1] > what {
+						continue p1
 					}
 				}
 			}
@@ -43,10 +48,13 @@ func find(C int, star [][]int, what int) (int, int) {
 	}
 	for i, start := range preComp[:len(preComp)-1] { // přidá kombinace přes jádro, tj. 2 paprsky
 		for ii, end := range preComp[i+1:] {
+		p2:
 			for j, s := range start {
 				for k, e := range end {
 					if s+C+e == what {
 						return star[i][j], star[ii+1][k]
+					} else if s+C+e > what {
+						continue p2
 					}
 				}
 			}

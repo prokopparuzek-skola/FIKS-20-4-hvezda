@@ -4,16 +4,17 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"sort"
 	"strings"
 )
 
-func compute(C int, star [][]int) (out []int) {
+func find(C int, star [][]int, what int) (int, int) {
 	var preComp [][]int
 	var prev int
-	out = make([]int, 0)
 	preComp = make([][]int, len(star))
 
+	if C == what {
+		return C, C
+	}
 	for i, ray := range star { // prefixové součty pro všechny paprsky od jádra
 		preComp[i] = make([]int, len(star[i]))
 		prev = 0
@@ -22,35 +23,42 @@ func compute(C int, star [][]int) (out []int) {
 			prev += f
 		}
 	}
-	for _, ray := range preComp { // přidá všechny kombinace v paprsích
+	for i, ray := range preComp { // hledá mezi kombinacemi v paprsích
 		for j := range ray {
 			for k := range ray[j:] {
 				if j == 0 { // od začátku
-					out = append(out, ray[k])   // bez jádra
-					out = append(out, ray[k]+C) // s jádrem
+					if ray[k] == what { // bez jádra
+						return star[i][0], star[i][k]
+					}
+					if ray[k]+C == what { // s jádrem
+						return C, star[i][k]
+					}
 				} else { // od prostřed
-					out = append(out, ray[k+1]-ray[j-1])
+					if ray[k+1]-ray[j-1] == what {
+						return star[i][k+1], star[i][j]
+					}
 				}
 			}
 		}
 	}
 	for i, start := range preComp[:len(preComp)-1] { // přidá kombinace přes jádro, tj. 2 paprsky
-		for _, end := range preComp[i+1:] {
-			for _, s := range start {
-				for _, e := range end {
-					out = append(out, s+C+e)
+		for ii, end := range preComp[i+1:] {
+			for j, s := range start {
+				for k, e := range end {
+					if s+C+e == what {
+						return star[i][j], star[ii+1][k]
+					}
 				}
 			}
 		}
 	}
-	out = append(out, C) // přidá jádro
-	return
+	return -1, -1
 }
 
 func main() {
 	var C, R int // jádro, počet paprsků
 	var star [][]int
-	var frequencies []int
+	var count, what int
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Scan(&R, &C)
@@ -65,8 +73,10 @@ func main() {
 			fmt.Sscan(split[j], &star[i][j])
 		}
 	}
-	frequencies = compute(C, star)
-	sort.Slice(frequencies, func(i, j int) bool { return frequencies[i] < frequencies[j] })
-	out := fmt.Sprint(frequencies)
-	fmt.Println(out[1 : len(out)-1])
+	fmt.Fscan(reader, &count) // načte hledané frekvence
+	for i := 0; i < count; i++ {
+		fmt.Fscan(reader, &what)
+		a, b := find(C, star, what)
+		fmt.Println(a, b)
+	}
 }

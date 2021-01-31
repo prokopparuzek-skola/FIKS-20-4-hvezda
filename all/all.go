@@ -1,3 +1,4 @@
+// psáno v jazyce golang
 package main
 
 import (
